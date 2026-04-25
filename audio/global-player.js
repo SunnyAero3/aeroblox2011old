@@ -19,9 +19,8 @@
   audio.volume = 0.5;
   document.body.appendChild(audio);
 
-  var playing = false;
   var started = false;
-
+  var playing = false;
   var btn = document.getElementById("playBtn");
 
   function startMusic() {
@@ -35,25 +34,27 @@
       btn.innerHTML = "Pause";
     } catch (e) {}
 
-    detach();
+    removeListeners();
   }
 
-  function detach() {
-    var events = ["click", "touchstart", "keydown", "scroll"];
+  function removeListeners() {
+    var events = ["click", "touchstart", "keydown"];
 
     for (var i = 0; i < events.length; i++) {
       if (document.removeEventListener) {
-        document.removeEventListener(events[i], startMusic, true);
-        document.removeEventListener(events[i], startMusic, false);
+        document.removeEventListener(events[i], startMusic);
       }
     }
   }
 
-  var events = ["click", "touchstart", "keydown", "scroll"];
+  // attach only REAL trusted gestures
+  var events = ["click", "touchstart", "keydown"];
 
   for (var i = 0; i < events.length; i++) {
     if (document.addEventListener) {
-      document.addEventListener(events[i], startMusic, false);
+      document.addEventListener(events[i], startMusic);
+    } else if (document.attachEvent) {
+      document.attachEvent("on" + events[i], startMusic);
     }
   }
 
