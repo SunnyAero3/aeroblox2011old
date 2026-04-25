@@ -1,7 +1,13 @@
 (function () {
 
-  if (document.getElementById("musicPlayer")) return;
+  // =========================
+  // DETECT IE
+  // =========================
+  var isIE = !!document.documentMode;
 
+  // =========================
+  // AUDIO SETUP
+  // =========================
   var audio = document.createElement("audio");
   audio.src = "audio/bloxburg-menu.mp3";
   audio.loop = true;
@@ -10,7 +16,10 @@
 
   var started = false;
 
-  function startMusic() {
+  // =========================
+  // MODERN MODE
+  // =========================
+  function startMusicModern() {
     if (started) return;
     started = true;
 
@@ -19,21 +28,64 @@
       audio.play();
     } catch (e) {}
 
-    // remove handler after first use
-    if (document.body.detachEvent) {
-      document.body.detachEvent("onclick", startMusic);
-    } else {
-      document.body.removeEventListener("click", startMusic);
+    detachModern();
+  }
+
+  function detachModern() {
+    var events = ["click", "touchstart", "keydown"];
+    for (var i = 0; i < events.length; i++) {
+      if (document.removeEventListener) {
+        document.removeEventListener(events[i], startMusicModern);
+      }
     }
   }
 
   // =========================
-  // IMPORTANT FIX: bind to BODY only (IE-safe)
+  // IE MODE (SAFE BUTTON ONLY)
   // =========================
-  if (document.body.attachEvent) {
-    document.body.attachEvent("onclick", startMusic);
+  function createIEButton() {
+    var btn = document.createElement("button");
+    btn.innerHTML = "Play Music 🎵";
+
+    btn.style.position = "fixed";
+    btn.style.top = "10px";
+    btn.style.left = "10px";
+    btn.style.zIndex = "999999";
+    btn.style.padding = "8px 12px";
+    btn.style.fontFamily = "Arial";
+
+    document.body.appendChild(btn);
+
+    btn.onclick = function () {
+      try {
+        audio.currentTime = 0;
+        audio.play();
+        btn.innerHTML = "Music Playing 🎵";
+      } catch (e) {
+        btn.innerHTML = "Blocked in IE";
+      }
+    };
+  }
+
+  // =========================
+  // RUN MODE
+  // =========================
+  if (isIE) {
+
+    // IE fallback only
+    createIEButton();
+
   } else {
-    document.body.addEventListener("click", startMusic);
+
+    // =========================
+    // MODERN: first interaction anywhere
+    // =========================
+    var events = ["click", "touchstart", "keydown"];
+
+    for (var i = 0; i < events.length; i++) {
+      document.addEventListener(events[i], startMusicModern, false);
+    }
+
   }
 
 })();
