@@ -1200,5 +1200,86 @@ if (new Date() > new Date('11/18/2011 8:58:45 AM')){alert('Your system time is i
 </form>
 
 <script src="audio/global-player.js"></script>    
+
+<script type="text/javascript">
+
+function getGender() {
+    var radios = document.getElementsByName("gender");
+    for (var i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+            return radios[i].value;
+        }
+    }
+    return "";
+}
+
+function signup() {
+
+    var username = document.getElementById("username").value;
+    var password = document.getElementById("password").value;
+    var month = document.getElementById("month").value;
+    var year = document.getElementById("year").value;
+    var gender = getGender();
+
+    var status = document.getElementById("status");
+
+    if (username == "" || password == "") {
+        status.style.color = "red";
+        status.innerHTML = "Please fill in username and password";
+        return false;
+    }
+
+    status.style.color = "black";
+    status.innerHTML = "Creating account...";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://shiny-flower-e05f.sunnyaero3.workers.dev/signup", true);
+
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhr.onreadystatechange = function () {
+
+        if (xhr.readyState == 4) {
+
+            if (xhr.status == 200) {
+
+                status.style.color = "green";
+                status.innerHTML = "Account created successfully!";
+
+            } else if (xhr.status == 409) {
+
+                status.style.color = "red";
+                status.innerHTML = "Username already exists";
+
+            } else if (xhr.status == 400) {
+
+                status.style.color = "red";
+                status.innerHTML = "Missing fields";
+
+            } else {
+
+                status.style.color = "red";
+                status.innerHTML = "Error creating account";
+
+            }
+
+        }
+
+    };
+
+    var data =
+        "username=" + escape(username) +
+        "&password=" + escape(password) +
+        "&month=" + escape(month) +
+        "&year=" + escape(year) +
+        "&gender=" + escape(gender);
+
+    xhr.send(data);
+
+    return false;
+}
+
+</script>
+
 </body>
 </html>
