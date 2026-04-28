@@ -2,12 +2,12 @@ const API = "https://shiny-flower-e05f.sunnyaero3.workers.dev";
 
 
 // =========================
-// AUTO LOGIN CHECK
+// CHECK LOGIN STATE (ALL PAGES)
 // =========================
 function checkLogin() {
 
     var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    xhr.open("GET", API + "/me", true);
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -16,26 +16,20 @@ function checkLogin() {
 
                 var username = xhr.responseText.replace("LOGGED_IN:", "");
 
-                // update UI if exists
+                // Top bar / UI update
                 var userBox = document.getElementById("userBox");
-                var loginBox = document.getElementById("loginBox");
-
                 if (userBox) {
-                    userBox.style.display = "block";
                     userBox.innerHTML = "Welcome, " + username;
                 }
 
-                if (loginBox) {
-                    loginBox.style.display = "none";
-                }
+                // Optional: store for UI use
+                window.currentUser = username;
             }
         }
     };
 
-    xhr.open("GET", API + "/me", true);
     xhr.send();
 }
-
 
 
 // =========================
@@ -43,50 +37,41 @@ function checkLogin() {
 // =========================
 function loginSubmit() {
 
-    var username = document.getElementById("username").value;
-    var password = document.getElementById("password").value;
+    var usernameEl = document.getElementById("username");
+    var passwordEl = document.getElementById("password");
+    var status = document.getElementById("status");
 
-    var status = document.getElementById("loginStatus");
-
-    if (username === "" || password === "") {
-        if (status) {
-            status.style.color = "red";
-            status.innerHTML = "Enter username and password";
-        }
+    if (!usernameEl.value || !passwordEl.value) {
+        if (status) status.innerHTML = "Enter username and password";
         return false;
     }
 
     var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    xhr.open("POST", API + "/login", true);
+
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
 
-            if (xhr.status === 200 && xhr.responseText === "LOGIN_OK") {
+            if (xhr.status === 200) {
 
                 window.location = "/aeroblox2011/Games.html";
 
             } else {
 
-                if (status) {
-                    status.style.color = "red";
-                    status.innerHTML = "Invalid login";
-                }
+                if (status) status.innerHTML = "Invalid login";
             }
         }
     };
 
-    xhr.open("POST", API + "/login", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
     xhr.send(
-        "username=" + encodeURIComponent(username) +
-        "&password=" + encodeURIComponent(password)
+        "username=" + encodeURIComponent(usernameEl.value) +
+        "&password=" + encodeURIComponent(passwordEl.value)
     );
 
     return false;
 }
-
 
 
 // =========================
@@ -94,70 +79,57 @@ function loginSubmit() {
 // =========================
 function signupSubmit() {
 
-    var username = document.getElementById("username").value;
-    var password = document.getElementById("password").value;
-    var month = document.getElementById("month").value;
-    var year = document.getElementById("year").value;
+    var usernameEl = document.getElementById("username");
+    var passwordEl = document.getElementById("password");
+    var genderEl = document.getElementById("gender");
+    var monthEl = document.getElementById("month");
+    var yearEl = document.getElementById("year");
 
     var status = document.getElementById("status");
 
-    if (username === "" || password === "") {
-        if (status) {
-            status.style.color = "red";
-            status.innerHTML = "Please enter username and password";
-        }
+    if (!usernameEl.value || !passwordEl.value) {
+        if (status) status.innerHTML = "Fill all required fields";
         return false;
     }
 
     var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    xhr.open("POST", API + "/signup", true);
+
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
 
-            if (xhr.status === 200 && xhr.responseText === "SIGNUP_OK") {
+            if (xhr.status === 200) {
 
-                if (status) {
-                    status.style.color = "green";
-                    status.innerHTML = "Account created!";
-                }
-
-                setTimeout(function () {
-                    window.location = "/aeroblox2011/Games.html";
-                }, 1000);
+                window.location = "/aeroblox2011/Login.html";
 
             } else {
 
-                if (status) {
-                    status.style.color = "red";
-                    status.innerHTML = xhr.responseText;
-                }
+                if (status) status.innerHTML = xhr.responseText;
             }
         }
     };
 
-    xhr.open("POST", API + "/signup", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
     xhr.send(
-        "username=" + encodeURIComponent(username) +
-        "&password=" + encodeURIComponent(password) +
-        "&month=" + encodeURIComponent(month) +
-        "&year=" + encodeURIComponent(year)
+        "username=" + encodeURIComponent(usernameEl.value) +
+        "&password=" + encodeURIComponent(passwordEl.value) +
+        "&gender=" + encodeURIComponent(genderEl.value || "") +
+        "&month=" + encodeURIComponent(monthEl.value || "") +
+        "&year=" + encodeURIComponent(yearEl.value || "")
     );
 
     return false;
 }
 
 
-
 // =========================
-// LOGOUT
+// OPTIONAL: LOGOUT (FUTURE READY)
 // =========================
 function logout() {
 
     var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    xhr.open("POST", API + "/logout", true);
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -165,10 +137,8 @@ function logout() {
         }
     };
 
-    xhr.open("GET", API + "/logout", true);
     xhr.send();
 }
-
 
 
 // =========================
