@@ -2,7 +2,7 @@ const API = "https://shiny-flower-e05f.sunnyaero3.workers.dev";
 
 
 // =========================
-// AUTO LOGIN CHECK (/me)
+// AUTO LOGIN (/me)
 // =========================
 function checkLogin() {
 
@@ -13,15 +13,10 @@ function checkLogin() {
         if (xhr.readyState === 4 && xhr.status === 200) {
 
             if (xhr.responseText.indexOf("LOGGED_IN:") === 0) {
-
                 var username = xhr.responseText.replace("LOGGED_IN:", "");
 
                 var box = document.getElementById("userBox");
-                if (box) {
-                    box.innerHTML = "Welcome, " + username;
-                }
-
-                window.currentUser = username;
+                if (box) box.innerHTML = "Welcome, " + username;
             }
         }
     };
@@ -31,7 +26,7 @@ function checkLogin() {
 
 
 // =========================
-// SIGNUP
+// SIGNUP (STRICT VALIDATION)
 // =========================
 function signupSubmit() {
 
@@ -40,11 +35,6 @@ function signupSubmit() {
     var monthEl = document.getElementById("month");
     var yearEl = document.getElementById("year");
     var status = document.getElementById("status");
-
-    if (!usernameEl || !passwordEl || !monthEl || !yearEl) {
-        alert("Missing signup form elements");
-        return false;
-    }
 
     var gender = "";
     var radios = document.getElementsByName("gender");
@@ -56,6 +46,34 @@ function signupSubmit() {
         }
     }
 
+    // =========================
+    // VALIDATION (UPGRADED)
+    // =========================
+    if (!usernameEl.value.trim()) {
+        if (status) status.innerHTML = "Username required";
+        return false;
+    }
+
+    if (!passwordEl.value.trim()) {
+        if (status) status.innerHTML = "Password required";
+        return false;
+    }
+
+    if (!monthEl.value) {
+        if (status) status.innerHTML = "Select birth month";
+        return false;
+    }
+
+    if (!yearEl.value) {
+        if (status) status.innerHTML = "Select birth year";
+        return false;
+    }
+
+    if (!gender) {
+        if (status) status.innerHTML = "Select gender";
+        return false;
+    }
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", API + "/signup", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -65,19 +83,26 @@ function signupSubmit() {
 
             if (xhr.status === 200) {
 
-                if (status) status.innerHTML = "Account created!";
+                if (status) {
+                    status.style.color = "green";
+                    status.innerHTML = "Account created!";
+                }
+
                 window.location = "/aeroblox2011/Login.html";
 
             } else {
 
-                if (status) status.innerHTML = xhr.responseText;
+                if (status) {
+                    status.style.color = "red";
+                    status.innerHTML = xhr.responseText || "Signup failed";
+                }
             }
         }
     };
 
     xhr.send(
-        "username=" + encodeURIComponent(usernameEl.value) +
-        "&password=" + encodeURIComponent(passwordEl.value) +
+        "username=" + encodeURIComponent(usernameEl.value.trim()) +
+        "&password=" + encodeURIComponent(passwordEl.value.trim()) +
         "&month=" + encodeURIComponent(monthEl.value) +
         "&year=" + encodeURIComponent(yearEl.value) +
         "&gender=" + encodeURIComponent(gender)
@@ -88,16 +113,16 @@ function signupSubmit() {
 
 
 // =========================
-// LOGIN
+// LOGIN (FIXED + SAFE)
 // =========================
 function loginSubmit() {
 
-    var usernameEl = document.getElementById("username");
-    var passwordEl = document.getElementById("password");
-    var status = document.getElementById("status");
+    var usernameEl = document.getElementById("ctl00_cphRoblox_lRobloxLogin_UserName");
+    var passwordEl = document.getElementById("ctl00_cphRoblox_lRobloxLogin_Password");
+    var status = document.getElementById("loginStatus");
 
-    if (!usernameEl || !passwordEl) {
-        if (status) status.innerHTML = "Missing fields";
+    if (!usernameEl.value.trim() || !passwordEl.value.trim()) {
+        if (status) status.innerHTML = "Enter username and password";
         return false;
     }
 
@@ -109,16 +134,19 @@ function loginSubmit() {
         if (xhr.readyState === 4) {
 
             if (xhr.status === 200) {
+
                 window.location = "/aeroblox2011/Games.html";
+
             } else {
+
                 if (status) status.innerHTML = "Invalid login";
             }
         }
     };
 
     xhr.send(
-        "username=" + encodeURIComponent(usernameEl.value) +
-        "&password=" + encodeURIComponent(passwordEl.value)
+        "username=" + encodeURIComponent(usernameEl.value.trim()) +
+        "&password=" + encodeURIComponent(passwordEl.value.trim())
     );
 
     return false;
