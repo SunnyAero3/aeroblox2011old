@@ -1,4 +1,4 @@
-https://sunnyaero3.github.io/aeroblox2011/
+https://sunnyaero3.github.io/aeroblox2011old/
 
 right now theres no backend so here are the other links of htmls that will be chacnged later when backend comes(right now backend exists i am slowly constructing it)
 
